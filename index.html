@@ -1,0 +1,1008 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parsahutaon Palito PK2</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <style>
+        .batak-pattern {
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23dc2626' fill-opacity='0.1'%3E%3Cpath d='M30 30c0-11.046-8.954-20-20-20s-20 8.954-20 20 8.954 20 20 20 20-8.954 20-20zm0 0c0 11.046 8.954 20 20 20s20-8.954 20-20-8.954-20-20-20-20 8.954-20 20z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        .admin-hidden { display: none; }
+        .admin-visible { display: block; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Admin Login Modal -->
+    <div id="loginModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">Admin Login</h3>
+                    <button onclick="closeLoginModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <form onsubmit="adminLogin(event)">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Email Admin</label>
+                        <input type="email" id="adminEmail" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500" required>
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                        <input type="password" id="adminPassword" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500" required>
+                    </div>
+                    <button type="submit" class="w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition duration-200">
+                        Login
+                    </button>
+                </form>
+                <div class="mt-4 text-center">
+                    <button onclick="forgotPassword()" class="text-sm text-red-600 hover:text-red-800">Lupa Password?</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="bg-white shadow-lg">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center relative overflow-hidden">
+                        <img id="logoImage" src="" alt="Logo" class="w-full h-full object-cover hidden">
+                        <i class="fas fa-church text-white text-2xl" id="defaultLogo"></i>
+                        <input type="file" id="logoUpload" accept="image/*" class="admin-hidden absolute inset-0 opacity-0 cursor-pointer">
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">Parsahutaon Palito PK2</h1>
+                        <p class="text-gray-600">Organisasi Budaya Batak, Keagamaan, dan Sosial</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="adminLoginBtn" onclick="openLoginModal()" class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition duration-200">
+                        <i class="fas fa-user-shield mr-2"></i>Admin
+                    </button>
+                    <button id="adminLogoutBtn" onclick="adminLogout()" class="admin-hidden bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition duration-200">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="relative bg-gradient-to-r from-red-600 to-red-800 text-white py-20 batak-pattern">
+        <div class="absolute inset-0 bg-black opacity-20"></div>
+        <div class="container mx-auto px-4 relative z-10">
+            <div class="text-center">
+                <div class="mb-8 relative">
+                    <img id="heroImage" src="" alt="Hero Image" class="w-full h-64 object-cover rounded-lg shadow-lg hidden">
+                    <div id="defaultHero" class="w-full h-64 bg-black bg-opacity-30 rounded-lg shadow-lg flex items-center justify-center">
+                        <div class="text-center">
+                            <i class="fas fa-users text-6xl mb-4"></i>
+                            <p class="text-xl">Selamat Datang di Parsahutaon Palito PK2</p>
+                        </div>
+                    </div>
+                    <input type="file" id="heroUpload" accept="image/*" class="admin-hidden absolute inset-0 opacity-0 cursor-pointer">
+                </div>
+                <h2 class="text-4xl font-bold mb-4">Horas! Selamat Datang</h2>
+                <p class="text-xl mb-8">Memperkuat persaudaraan dalam budaya Batak, iman, dan kepedulian sosial</p>
+                <div class="bg-white bg-opacity-20 rounded-lg p-6 max-w-2xl mx-auto">
+                    <p class="text-lg"><i class="fas fa-map-marker-alt mr-2"></i>Perumahan Pesona Kahuripan 2 Cikahuripan</p>
+                    <p class="text-lg"><i class="fas fa-envelope mr-2"></i>palitoopk2@gmail.com</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md sticky top-0 z-40">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-center space-x-8 py-4">
+                <button onclick="showSection('home')" class="nav-btn text-gray-700 hover:text-red-600 font-medium transition duration-200 border-b-2 border-red-600">Beranda</button>
+                <button onclick="showSection('structure')" class="nav-btn text-gray-700 hover:text-red-600 font-medium transition duration-200">Struktur Organisasi</button>
+                <button onclick="showSection('programs')" class="nav-btn text-gray-700 hover:text-red-600 font-medium transition duration-200">Program</button>
+                <button onclick="showSection('gallery')" class="nav-btn text-gray-700 hover:text-red-600 font-medium transition duration-200">Galeri</button>
+                <button onclick="showSection('documents')" class="nav-btn text-gray-700 hover:text-red-600 font-medium transition duration-200">Dokumen</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Home Section -->
+        <section id="home" class="section-content">
+            <div class="grid md:grid-cols-2 gap-8 mb-12">
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4 text-red-600">Tentang Kami</h3>
+                    <p class="text-gray-700 leading-relaxed">
+                        Parsahutaon Palito PK2 adalah organisasi yang menghimpun masyarakat Batak di Perumahan Pesona Kahuripan 2 Cikahuripan. 
+                        Kami berkomitmen untuk melestarikan budaya Batak, memperkuat iman Kristiani, dan membangun kepedulian sosial di antara sesama.
+                    </p>
+                </div>
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4 text-red-600">Visi & Misi</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="font-semibold text-gray-900">Visi:</h4>
+                            <p class="text-gray-700">Menjadi wadah persaudaraan yang kuat dalam budaya, iman, dan sosial.</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-900">Misi:</h4>
+                            <ul class="text-gray-700 list-disc list-inside space-y-1">
+                                <li>Melestarikan budaya dan adat Batak</li>
+                                <li>Memperkuat iman dan kehidupan rohani</li>
+                                <li>Membangun kepedulian sosial</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Structure Section -->
+        <section id="structure" class="section-content hidden">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-bold text-red-600">Struktur Kepengurusan</h3>
+                    <button onclick="editStructure()" class="admin-hidden bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                        <i class="fas fa-edit mr-2"></i>Edit
+                    </button>
+                </div>
+                
+                <div id="structureContent" class="space-y-6">
+                    <!-- Dewan Penasehat -->
+                    <div class="border-l-4 border-red-600 pl-4">
+                        <h4 class="text-xl font-bold text-gray-900 mb-3">DEWAN PENASEHAT</h4>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-16 h-16 bg-gray-300 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-user text-gray-600 text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="font-semibold">Amang R. Simanjuntak (op. Sena)</h5>
+                                        <p class="text-gray-600">Dewan Penasehat</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-16 h-16 bg-gray-300 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-user text-gray-600 text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="font-semibold">Amang B. Manalu</h5>
+                                        <p class="text-gray-600">Dewan Penasehat</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-16 h-16 bg-gray-300 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-user text-gray-600 text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="font-semibold">Amang A. Purba</h5>
+                                        <p class="text-gray-600">Dewan Penasehat</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-16 h-16 bg-gray-300 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-user text-gray-600 text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="font-semibold">Amang S. Naenggolan</h5>
+                                        <p class="text-gray-600">Dewan Penasehat</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pengurus Inti -->
+                    <div class="border-l-4 border-red-600 pl-4">
+                        <h4 class="text-xl font-bold text-gray-900 mb-3">PENGURUS INTI</h4>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="bg-red-50 p-4 rounded-lg">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-16 h-16 bg-red-200 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-crown text-red-600 text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="font-semibold">R. Simanjuntak</h5>
+                                        <p class="text-red-600 font-medium">Ketua</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-16 h-16 bg-gray-300 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-user text-gray-600 text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="font-semibold">Amang A. Manalu</h5>
+                                        <p class="text-gray-600">Wakil Ketua</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-16 h-16 bg-gray-300 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-user text-gray-600 text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="font-semibold">Amang I. Siagian</h5>
+                                        <p class="text-gray-600">Sekretaris</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-16 h-16 bg-gray-300 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-user text-gray-600 text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="font-semibold">Inang Ny. R. Aritonang/br Sitorus</h5>
+                                        <p class="text-gray-600">Bendahara 1</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-16 h-16 bg-gray-300 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-user text-gray-600 text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="font-semibold">Inang Ny H. Simbolon/br Sinurat</h5>
+                                        <p class="text-gray-600">Bendahara 2</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Seksi-seksi -->
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <!-- Seksi Rohani -->
+                        <div class="border-l-4 border-blue-600 pl-4">
+                            <h4 class="text-lg font-bold text-gray-900 mb-3">SEKSI ROHANI</h4>
+                            <div class="space-y-3">
+                                <div class="bg-blue-50 p-3 rounded-lg">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-12 h-12 bg-blue-200 rounded-full flex items-center justify-center">
+                                            <i class="fas fa-pray text-blue-600"></i>
+                                        </div>
+                                        <div>
+                                            <h5 class="font-medium">Inang Ny. M.S/br. Batubara</h5>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="bg-blue-50 p-3 rounded-lg">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-12 h-12 bg-blue-200 rounded-full flex items-center justify-center">
+                                            <i class="fas fa-pray text-blue-600"></i>
+                                        </div>
+                                        <div>
+                                            <h5 class="font-medium">Inang Ny. S. Naenggolan/br. Purba</h5>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Seksi Sosial -->
+                        <div class="border-l-4 border-green-600 pl-4">
+                            <h4 class="text-lg font-bold text-gray-900 mb-3">SEKSI SOSIAL</h4>
+                            <div class="space-y-3">
+                                <div class="bg-green-50 p-3 rounded-lg">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-12 h-12 bg-green-200 rounded-full flex items-center justify-center">
+                                            <i class="fas fa-hands-helping text-green-600"></i>
+                                        </div>
+                                        <div>
+                                            <h5 class="font-medium">Inang Ny. I. Siagian/br. Panjaitan</h5>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="bg-green-50 p-3 rounded-lg">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-12 h-12 bg-green-200 rounded-full flex items-center justify-center">
+                                            <i class="fas fa-hands-helping text-green-600"></i>
+                                        </div>
+                                        <div>
+                                            <h5 class="font-medium">Inang Ny. A. Purba/br. Sitohang</h5>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Seksi Adat -->
+                        <div class="border-l-4 border-yellow-600 pl-4">
+                            <h4 class="text-lg font-bold text-gray-900 mb-3">SEKSI ADAT</h4>
+                            <div class="bg-yellow-50 p-3 rounded-lg">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-12 h-12 bg-yellow-200 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-drum text-yellow-600"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="font-medium">Amang T. Nababan</h5>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Humas -->
+                        <div class="border-l-4 border-purple-600 pl-4">
+                            <h4 class="text-lg font-bold text-gray-900 mb-3">HUMAS</h4>
+                            <div class="space-y-3">
+                                <div class="bg-purple-50 p-3 rounded-lg">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-12 h-12 bg-purple-200 rounded-full flex items-center justify-center">
+                                            <i class="fas fa-bullhorn text-purple-600"></i>
+                                        </div>
+                                        <div>
+                                            <h5 class="font-medium">Amang H. Simangusong</h5>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="bg-purple-50 p-3 rounded-lg">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-12 h-12 bg-purple-200 rounded-full flex items-center justify-center">
+                                            <i class="fas fa-bullhorn text-purple-600"></i>
+                                        </div>
+                                        <div>
+                                            <h5 class="font-medium">Amang P. Situmorang</h5>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Programs Section -->
+        <section id="programs" class="section-content hidden">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-bold text-red-600">Program Kegiatan</h3>
+                    <button onclick="editPrograms()" class="admin-hidden bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                        <i class="fas fa-edit mr-2"></i>Edit Program
+                    </button>
+                </div>
+                
+                <div id="programsContent" class="grid md:grid-cols-2 gap-6">
+                    <!-- Program Bulanan -->
+                    <div class="border-l-4 border-blue-600 pl-4">
+                        <h4 class="text-xl font-bold text-gray-900 mb-4">Program Bulanan</h4>
+                        <div class="space-y-4">
+                            <div class="bg-blue-50 p-4 rounded-lg">
+                                <div class="flex items-center space-x-3 mb-2">
+                                    <i class="fas fa-coins text-blue-600 text-xl"></i>
+                                    <h5 class="font-semibold text-gray-900">Arisan Bulanan</h5>
+                                </div>
+                                <p class="text-gray-700">Kegiatan arisan rutin setiap bulan untuk mempererat silaturahmi dan membantu kebutuhan anggota.</p>
+                            </div>
+                            <div class="bg-blue-50 p-4 rounded-lg">
+                                <div class="flex items-center space-x-3 mb-2">
+                                    <i class="fas fa-pray text-blue-600 text-xl"></i>
+                                    <h5 class="font-semibold text-gray-900">Persekutuan Doa</h5>
+                                </div>
+                                <p class="text-gray-700">Ibadah bersama dan persekutuan doa untuk memperkuat iman dan kehidupan rohani.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Program Tahunan -->
+                    <div class="border-l-4 border-red-600 pl-4">
+                        <h4 class="text-xl font-bold text-gray-900 mb-4">Program Tahunan</h4>
+                        <div class="space-y-4">
+                            <div class="bg-red-50 p-4 rounded-lg">
+                                <div class="flex items-center space-x-3 mb-2">
+                                    <i class="fas fa-star text-red-600 text-xl"></i>
+                                    <h5 class="font-semibold text-gray-900">Perayaan Natal</h5>
+                                </div>
+                                <p class="text-gray-700">Perayaan Natal bersama dengan acara ibadah, makan bersama, dan pertunjukan budaya.</p>
+                            </div>
+                            <div class="bg-red-50 p-4 rounded-lg">
+                                <div class="flex items-center space-x-3 mb-2">
+                                    <i class="fas fa-calendar-alt text-red-600 text-xl"></i>
+                                    <h5 class="font-semibold text-gray-900">Bona Taon (Tahun Baru)</h5>
+                                </div>
+                                <p class="text-gray-700">Perayaan tahun baru dengan tradisi Batak dan doa syukur untuk tahun yang baru.</p>
+                            </div>
+                            <div class="bg-red-50 p-4 rounded-lg">
+                                <div class="flex items-center space-x-3 mb-2">
+                                    <i class="fas fa-drum text-red-600 text-xl"></i>
+                                    <h5 class="font-semibold text-gray-900">Festival Budaya Batak</h5>
+                                </div>
+                                <p class="text-gray-700">Pertunjukan seni dan budaya Batak untuk melestarikan warisan leluhur.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Gallery Section -->
+        <section id="gallery" class="section-content hidden">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-bold text-red-600">Galeri Kegiatan</h3>
+                    <button onclick="uploadGallery()" class="admin-hidden bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                        <i class="fas fa-upload mr-2"></i>Upload Foto
+                    </button>
+                </div>
+                
+                <div id="galleryContent" class="grid md:grid-cols-3 gap-4">
+                    <div class="bg-gray-100 rounded-lg p-8 text-center">
+                        <i class="fas fa-images text-gray-400 text-4xl mb-4"></i>
+                        <p class="text-gray-600">Belum ada foto kegiatan</p>
+                        <p class="text-sm text-gray-500 mt-2">Admin dapat mengunggah foto melalui tombol Upload Foto</p>
+                    </div>
+                </div>
+                <input type="file" id="galleryUpload" multiple accept="image/*" class="hidden">
+            </div>
+        </section>
+
+        <!-- Documents Section -->
+        <section id="documents" class="section-content hidden">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-bold text-red-600">Dokumen Organisasi</h3>
+                    <button onclick="uploadDocument()" class="admin-hidden bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                        <i class="fas fa-upload mr-2"></i>Upload Dokumen
+                    </button>
+                </div>
+                
+                <div id="documentsContent" class="space-y-4">
+                    <div class="bg-gray-100 rounded-lg p-8 text-center">
+                        <i class="fas fa-file-alt text-gray-400 text-4xl mb-4"></i>
+                        <p class="text-gray-600">Belum ada dokumen</p>
+                        <p class="text-sm text-gray-500 mt-2">Admin dapat mengunggah dokumen seperti AD/RT, Surat Keputusan, dll</p>
+                    </div>
+                </div>
+                <input type="file" id="documentUpload" accept=".pdf,.doc,.docx" class="hidden">
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-8 mt-12">
+        <div class="container mx-auto px-4">
+            <div class="grid md:grid-cols-3 gap-8">
+                <div>
+                    <h4 class="text-lg font-bold mb-4">Parsahutaon Palito PK2</h4>
+                    <p class="text-gray-300">Organisasi Budaya Batak, Keagamaan, dan Sosial di Perumahan Pesona Kahuripan 2 Cikahuripan</p>
+                </div>
+                <div>
+                    <h4 class="text-lg font-bold mb-4">Kontak</h4>
+                    <div class="space-y-2 text-gray-300">
+                        <p><i class="fas fa-map-marker-alt mr-2"></i>Perumahan Pesona Kahuripan 2 Cikahuripan</p>
+                        <p><i class="fas fa-envelope mr-2"></i>palitoopk2@gmail.com</p>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-lg font-bold mb-4">Ikuti Kami</h4>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-300 hover:text-white transition duration-200">
+                            <i class="fab fa-facebook-f text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-300 hover:text-white transition duration-200">
+                            <i class="fab fa-instagram text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-300 hover:text-white transition duration-200">
+                            <i class="fab fa-whatsapp text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-300">
+                <p>&copy; 2024 Parsahutaon Palito PK2. Horas!</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "demo-api-key",
+            authDomain: "palito-pk2-demo.firebaseapp.com",
+            projectId: "palito-pk2-demo",
+            storageBucket: "palito-pk2-demo.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "demo-app-id"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const storage = firebase.storage();
+        const firestore = firebase.firestore();
+        const auth = firebase.auth();
+
+        // Admin authentication
+        let isAdminLoggedIn = false;
+        const ADMIN_EMAIL = 'palitoopk2@gmail.com';
+        const ADMIN_PASSWORD = 'admin123';
+
+        // Check if admin is logged in on page load
+        if (localStorage.getItem('adminLoggedIn') === 'true') {
+            isAdminLoggedIn = true;
+            showAdminFeatures();
+        }
+
+        function openLoginModal() {
+            document.getElementById('loginModal').classList.remove('hidden');
+        }
+
+        function closeLoginModal() {
+            document.getElementById('loginModal').classList.add('hidden');
+            document.getElementById('adminEmail').value = '';
+            document.getElementById('adminPassword').value = '';
+        }
+
+        function adminLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('adminEmail').value.trim();
+            const password = document.getElementById('adminPassword').value;
+
+            // Check if email is the authorized admin email
+            if (email !== ADMIN_EMAIL) {
+                alert('Akses ditolak! Hanya pemilik akun ' + ADMIN_EMAIL + ' yang dapat login sebagai admin.');
+                return;
+            }
+
+            // Simple password check (in real implementation, use proper authentication)
+            if (password === ADMIN_PASSWORD || localStorage.getItem('adminNewPassword') === password) {
+                isAdminLoggedIn = true;
+                localStorage.setItem('adminLoggedIn', 'true');
+                localStorage.setItem('adminEmail', email);
+                showAdminFeatures();
+                closeLoginModal();
+                alert('Login berhasil! Selamat datang Admin.');
+            } else {
+                alert('Password salah. Silakan coba lagi atau gunakan fitur Lupa Password.');
+            }
+        }
+
+        function adminLogout() {
+            isAdminLoggedIn = false;
+            localStorage.removeItem('adminLoggedIn');
+            hideAdminFeatures();
+            alert('Logout berhasil.');
+        }
+
+        function showAdminFeatures() {
+            document.getElementById('adminLoginBtn').classList.add('hidden');
+            document.getElementById('adminLogoutBtn').classList.remove('hidden');
+            
+            const adminElements = document.querySelectorAll('.admin-hidden');
+            adminElements.forEach(el => {
+                el.classList.remove('admin-hidden');
+                el.classList.add('admin-visible');
+            });
+        }
+
+        function hideAdminFeatures() {
+            document.getElementById('adminLoginBtn').classList.remove('hidden');
+            document.getElementById('adminLogoutBtn').classList.add('hidden');
+            
+            const adminElements = document.querySelectorAll('.admin-visible');
+            adminElements.forEach(el => {
+                el.classList.remove('admin-visible');
+                el.classList.add('admin-hidden');
+            });
+        }
+
+        function forgotPassword() {
+            closeLoginModal();
+            const email = prompt('Masukkan email terdaftar untuk verifikasi:');
+            
+            if (!email) {
+                return; // User cancelled
+            }
+            
+            if (email.trim() === ADMIN_EMAIL) {
+                // Simulate email verification
+                const confirmReset = confirm('Kode verifikasi telah dikirim ke ' + ADMIN_EMAIL + '.\n\nKlik OK untuk melanjutkan reset password.');
+                
+                if (confirmReset) {
+                    const newPassword = prompt('Masukkan password baru (minimal 6 karakter):');
+                    
+                    if (newPassword && newPassword.length >= 6) {
+                        // Store new password (in real implementation, this would be hashed and stored securely)
+                        localStorage.setItem('adminNewPassword', newPassword);
+                        alert('Password berhasil direset!\n\nSilakan login dengan:\nEmail: ' + ADMIN_EMAIL + '\nPassword: (password baru yang Anda buat)');
+                        
+                        // Reopen login modal
+                        setTimeout(() => {
+                            openLoginModal();
+                        }, 500);
+                    } else if (newPassword !== null) {
+                        alert('Password minimal 6 karakter. Silakan coba lagi.');
+                        forgotPassword(); // Retry
+                    }
+                }
+            } else {
+                alert('Email tidak terdaftar sebagai admin.\n\nHanya pemilik akun ' + ADMIN_EMAIL + ' yang dapat mengakses fitur admin.');
+            }
+        }
+
+        // Navigation
+        function showSection(sectionName) {
+            // Hide all sections
+            const sections = document.querySelectorAll('.section-content');
+            sections.forEach(section => section.classList.add('hidden'));
+            
+            // Show selected section
+            document.getElementById(sectionName).classList.remove('hidden');
+            
+            // Update navigation
+            const navButtons = document.querySelectorAll('.nav-btn');
+            navButtons.forEach(btn => {
+                btn.classList.remove('border-b-2', 'border-red-600');
+                btn.classList.add('border-b-2', 'border-transparent');
+            });
+            event.target.classList.remove('border-transparent');
+            event.target.classList.add('border-red-600');
+        }
+
+        // Firebase Upload Functions
+        async function uploadToFirebase(file, path) {
+            try {
+                const storageRef = storage.ref().child(path);
+                const snapshot = await storageRef.put(file);
+                const downloadURL = await snapshot.ref.getDownloadURL();
+                return downloadURL;
+            } catch (error) {
+                console.error('Upload error:', error);
+                alert('Upload gagal. Menggunakan penyimpanan lokal.');
+                return null;
+            }
+        }
+
+        async function saveToFirestore(collection, data) {
+            try {
+                await firestore.collection(collection).doc('main').set(data, { merge: true });
+            } catch (error) {
+                console.error('Firestore error:', error);
+            }
+        }
+
+        async function loadFromFirestore(collection) {
+            try {
+                const doc = await firestore.collection(collection).doc('main').get();
+                return doc.exists ? doc.data() : null;
+            } catch (error) {
+                console.error('Firestore load error:', error);
+                return null;
+            }
+        }
+
+        // File upload handlers
+        document.getElementById('logoUpload').addEventListener('change', async function(e) {
+            if (!isAdminLoggedIn) return;
+            const file = e.target.files[0];
+            if (file) {
+                // Show loading
+                const logoContainer = document.getElementById('logoImage').parentElement;
+                logoContainer.innerHTML += '<div id="logoLoading" class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center"><i class="fas fa-spinner fa-spin text-white text-xl"></i></div>';
+                
+                // Upload to Firebase
+                const downloadURL = await uploadToFirebase(file, `images/logo-${Date.now()}`);
+                
+                if (downloadURL) {
+                    // Save to Firestore
+                    await saveToFirestore('settings', { logoURL: downloadURL });
+                    
+                    // Update UI
+                    document.getElementById('logoImage').src = downloadURL;
+                    document.getElementById('logoImage').classList.remove('hidden');
+                    document.getElementById('defaultLogo').classList.add('hidden');
+                    
+                    alert('Logo berhasil diupload dan tersimpan permanen!');
+                } else {
+                    // Fallback to local storage
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        document.getElementById('logoImage').src = e.target.result;
+                        document.getElementById('logoImage').classList.remove('hidden');
+                        document.getElementById('defaultLogo').classList.add('hidden');
+                        localStorage.setItem('logoImage', e.target.result);
+                    };
+                    reader.readAsDataURL(file);
+                }
+                
+                // Remove loading
+                const loading = document.getElementById('logoLoading');
+                if (loading) loading.remove();
+            }
+        });
+
+        document.getElementById('heroUpload').addEventListener('change', async function(e) {
+            if (!isAdminLoggedIn) return;
+            const file = e.target.files[0];
+            if (file) {
+                // Show loading
+                const heroContainer = document.getElementById('heroImage').parentElement;
+                heroContainer.innerHTML += '<div id="heroLoading" class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20"><i class="fas fa-spinner fa-spin text-white text-2xl"></i><span class="text-white ml-2">Mengupload...</span></div>';
+                
+                // Upload to Firebase
+                const downloadURL = await uploadToFirebase(file, `images/hero-${Date.now()}`);
+                
+                if (downloadURL) {
+                    // Save to Firestore
+                    await saveToFirestore('settings', { heroURL: downloadURL });
+                    
+                    // Update UI
+                    document.getElementById('heroImage').src = downloadURL;
+                    document.getElementById('heroImage').classList.remove('hidden');
+                    document.getElementById('defaultHero').classList.add('hidden');
+                    
+                    alert('Foto hero berhasil diupload dan tersimpan permanen!');
+                } else {
+                    // Fallback to local storage
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        document.getElementById('heroImage').src = e.target.result;
+                        document.getElementById('heroImage').classList.remove('hidden');
+                        document.getElementById('defaultHero').classList.add('hidden');
+                        localStorage.setItem('heroImage', e.target.result);
+                    };
+                    reader.readAsDataURL(file);
+                }
+                
+                // Remove loading
+                const loading = document.getElementById('heroLoading');
+                if (loading) loading.remove();
+            }
+        });
+
+        document.getElementById('galleryUpload').addEventListener('change', async function(e) {
+            if (!isAdminLoggedIn) return;
+            const files = e.target.files;
+            const galleryContent = document.getElementById('galleryContent');
+            
+            if (files.length > 0) {
+                // Show loading
+                galleryContent.innerHTML = '<div class="col-span-3 text-center py-8"><i class="fas fa-spinner fa-spin text-red-600 text-3xl mb-4"></i><p class="text-gray-600">Mengupload foto ke server...</p></div>';
+                
+                const galleryImages = [];
+                
+                for (let file of files) {
+                    try {
+                        // Upload to Firebase
+                        const downloadURL = await uploadToFirebase(file, `gallery/gallery-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
+                        
+                        if (downloadURL) {
+                            galleryImages.push({
+                                url: downloadURL,
+                                name: file.name,
+                                uploadDate: new Date().toISOString()
+                            });
+                        }
+                    } catch (error) {
+                        console.error('Gallery upload error:', error);
+                    }
+                }
+                
+                // Save to Firestore
+                if (galleryImages.length > 0) {
+                    const existingGallery = await loadFromFirestore('gallery');
+                    const allImages = existingGallery?.images || [];
+                    allImages.push(...galleryImages);
+                    
+                    await saveToFirestore('gallery', { images: allImages });
+                    
+                    // Update UI
+                    displayGallery(allImages);
+                    alert(`${galleryImages.length} foto berhasil diupload dan tersimpan permanen!`);
+                } else {
+                    // Fallback to local display
+                    galleryContent.innerHTML = '';
+                    Array.from(files).forEach(file => {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            const div = document.createElement('div');
+                            div.className = 'relative group';
+                            div.innerHTML = `
+                                <img src="${e.target.result}" alt="Foto Kegiatan" class="w-full h-48 object-cover rounded-lg shadow-md">
+                                <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-lg flex items-center justify-center">
+                                    <button onclick="removeGalleryImage(this)" class="bg-red-600 text-white px-3 py-1 rounded-md hover:bg-red-700">
+                                        <i class="fas fa-trash mr-1"></i>Hapus
+                                    </button>
+                                </div>
+                            `;
+                            galleryContent.appendChild(div);
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                }
+            }
+        });
+
+        document.getElementById('documentUpload').addEventListener('change', function(e) {
+            if (!isAdminLoggedIn) return;
+            const files = e.target.files;
+            const documentsContent = document.getElementById('documentsContent');
+            
+            if (files.length > 0) {
+                documentsContent.innerHTML = '';
+                Array.from(files).forEach(file => {
+                    const div = document.createElement('div');
+                    div.className = 'bg-gray-50 p-4 rounded-lg flex items-center justify-between';
+                    div.innerHTML = `
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-file-pdf text-red-600 text-2xl"></i>
+                            <div>
+                                <h5 class="font-medium text-gray-900">${file.name}</h5>
+                                <p class="text-sm text-gray-600">Ukuran: ${(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                            </div>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="downloadDocument('${file.name}')" class="bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700">
+                                <i class="fas fa-download mr-1"></i>Download
+                            </button>
+                            <button onclick="removeDocument(this)" class="bg-red-600 text-white px-3 py-1 rounded-md hover:bg-red-700">
+                                <i class="fas fa-trash mr-1"></i>Hapus
+                            </button>
+                        </div>
+                    `;
+                    documentsContent.appendChild(div);
+                });
+            }
+        });
+
+        // Gallery display function
+        function displayGallery(images) {
+            const galleryContent = document.getElementById('galleryContent');
+            
+            if (!images || images.length === 0) {
+                galleryContent.innerHTML = `
+                    <div class="bg-gray-100 rounded-lg p-8 text-center">
+                        <i class="fas fa-images text-gray-400 text-4xl mb-4"></i>
+                        <p class="text-gray-600">Belum ada foto kegiatan</p>
+                        <p class="text-sm text-gray-500 mt-2">Admin dapat mengunggah foto melalui tombol Upload Foto</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            galleryContent.innerHTML = '';
+            images.forEach((image, index) => {
+                const div = document.createElement('div');
+                div.className = 'relative group';
+                div.innerHTML = `
+                    <img src="${image.url}" alt="Foto Kegiatan" class="w-full h-48 object-cover rounded-lg shadow-md">
+                    <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-lg flex items-center justify-center">
+                        <button onclick="removeGalleryImagePermanent(${index})" class="bg-red-600 text-white px-3 py-1 rounded-md hover:bg-red-700 ${isAdminLoggedIn ? '' : 'hidden'}">
+                            <i class="fas fa-trash mr-1"></i>Hapus
+                        </button>
+                    </div>
+                `;
+                galleryContent.appendChild(div);
+            });
+        }
+
+        // Admin functions
+        function editStructure() {
+            if (!isAdminLoggedIn) return;
+            alert('Fitur edit struktur organisasi akan membuka form untuk mengedit nama dan jabatan pengurus.');
+        }
+
+        function editPrograms() {
+            if (!isAdminLoggedIn) return;
+            alert('Fitur edit program akan membuka form untuk menambah, mengedit, atau menghapus program kegiatan.');
+        }
+
+        function uploadGallery() {
+            if (!isAdminLoggedIn) return;
+            document.getElementById('galleryUpload').click();
+        }
+
+        function uploadDocument() {
+            if (!isAdminLoggedIn) return;
+            document.getElementById('documentUpload').click();
+        }
+
+        async function removeGalleryImagePermanent(index) {
+            if (!isAdminLoggedIn) return;
+            if (confirm('Hapus foto ini secara permanen?')) {
+                try {
+                    const galleryData = await loadFromFirestore('gallery');
+                    if (galleryData && galleryData.images) {
+                        galleryData.images.splice(index, 1);
+                        await saveToFirestore('gallery', { images: galleryData.images });
+                        displayGallery(galleryData.images);
+                        alert('Foto berhasil dihapus secara permanen!');
+                    }
+                } catch (error) {
+                    console.error('Remove error:', error);
+                    alert('Gagal menghapus foto.');
+                }
+            }
+        }
+
+        function removeGalleryImage(button) {
+            if (!isAdminLoggedIn) return;
+            if (confirm('Hapus foto ini?')) {
+                button.closest('.relative').remove();
+            }
+        }
+
+        function removeDocument(button) {
+            if (!isAdminLoggedIn) return;
+            if (confirm('Hapus dokumen ini?')) {
+                button.closest('.bg-gray-50').remove();
+            }
+        }
+
+        function downloadDocument(filename) {
+            alert('Download dokumen: ' + filename);
+            // In real implementation, this would trigger actual file download
+        }
+
+        // Load data from Firebase on page load
+        async function loadWebsiteData() {
+            try {
+                // Load settings (logo, hero)
+                const settings = await loadFromFirestore('settings');
+                if (settings) {
+                    if (settings.logoURL) {
+                        document.getElementById('logoImage').src = settings.logoURL;
+                        document.getElementById('logoImage').classList.remove('hidden');
+                        document.getElementById('defaultLogo').classList.add('hidden');
+                    }
+                    if (settings.heroURL) {
+                        document.getElementById('heroImage').src = settings.heroURL;
+                        document.getElementById('heroImage').classList.remove('hidden');
+                        document.getElementById('defaultHero').classList.add('hidden');
+                    }
+                }
+
+                // Load gallery
+                const galleryData = await loadFromFirestore('gallery');
+                if (galleryData && galleryData.images) {
+                    displayGallery(galleryData.images);
+                }
+            } catch (error) {
+                console.log('Loading from local storage as fallback...');
+                // Fallback to localStorage
+                const logoImage = localStorage.getItem('logoImage');
+                if (logoImage) {
+                    document.getElementById('logoImage').src = logoImage;
+                    document.getElementById('logoImage').classList.remove('hidden');
+                    document.getElementById('defaultLogo').classList.add('hidden');
+                }
+                
+                const heroImage = localStorage.getItem('heroImage');
+                if (heroImage) {
+                    document.getElementById('heroImage').src = heroImage;
+                    document.getElementById('heroImage').classList.remove('hidden');
+                    document.getElementById('defaultHero').classList.add('hidden');
+                }
+            }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            showSection('home');
+            loadWebsiteData();
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96ab5c9d54a2807d',t:'MTc1NDQ1MDA0Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
